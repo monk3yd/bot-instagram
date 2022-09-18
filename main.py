@@ -51,16 +51,29 @@ def run(playwright, username, password, target_acc):
     page.locator("input[name=password]").type(password, delay=100)
     page.locator("button[type=submit]", has_text="Log In").click()
 
-    # Manage popup save creds
+    # Manage popup
     page.locator("button[type=button]", has_text="Not Now").click()
-
-    # Manage popup notifications
     page.locator("button[class='_a9-- _a9_1']", has_text="Not Now").click()
 
-    # Search bar
+    # Search target account
     page.locator("input[placeholder=Search]").type(target_acc)
+
+    # Click first result
     page.locator("div._ad8j a").first.click()
     
+    # Click on followers link
+    page.locator("text=followers").click()
+
+    # Iterate through each follower
+    followers = page.locator("div._aano div._ab8w")
+    count = followers.count()
+    for i in range(count):
+        print(followers.nth(i).text_content())
+
+        # if follower == Following
+            # pass
+
+        # follow
 
     # --- Proof of Work ---
     page.wait_for_timeout(300000)
