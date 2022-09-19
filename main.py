@@ -1,4 +1,5 @@
 import os
+import random
 from playwright.sync_api import sync_playwright
 
 
@@ -61,17 +62,33 @@ def run(playwright, username, password, target_acc):
     # Click first result
     page.locator("div._ad8j a").first.click()
     
-    # Click on followers link
+    # Click on target followers link to see them
     page.locator("text=followers").click()
-
+    
+    # wait for list followers to load
     page.wait_for_load_state("networkidle")
 
     # Iterate through each follower
     followers = page.query_selector_all("._aacl._aaco._aacw._aad6._aade")
     for follower in followers:
-        if "Follow" in follower.text_content():
-            # click
+        follow_status = follower.text_content()
+        print(follow_status)
+        if "Follow" == follow_status:
             follower.click()
+        elif "Following" == follow_status or "Requested" == follow_status:
+            continue
+        # Add random sleep time between each follow
+        page.wait_for_timeout(random.uniform(0.7, 2))
+
+    # scroll down
+    page.locator("._aano").focus()
+    page.mouse.wheel(0, 1000)
+
+    # if new_height == last_height:
+    #     # break
+    #     ...
+    #
+    # last_height = new_height
     
     # --- Proof of Work ---
     page.wait_for_timeout(300000)
