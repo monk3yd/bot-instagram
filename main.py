@@ -64,17 +64,15 @@ def run(playwright, username, password, target_acc):
     # Click on followers link
     page.locator("text=followers").click()
 
+    page.wait_for_load_state("networkidle")
+
     # Iterate through each follower
-    followers = page.locator("div._aano div._ab8w")
-    count = followers.count()
-    for i in range(count):
-        print(followers.nth(i).text_content())
-
-        # if follower == Following
-            # pass
-
-        # follow
-
+    followers = page.query_selector_all("._aacl._aaco._aacw._aad6._aade")
+    for follower in followers:
+        if "Follow" in follower.text_content():
+            # click
+            follower.click()
+    
     # --- Proof of Work ---
     page.wait_for_timeout(300000)
     page.screenshot(path="proof.png")
