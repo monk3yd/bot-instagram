@@ -1,23 +1,35 @@
+'''
+Instagram Bot.
+This bot logs in into a desired account given a username and password as
+env variables.
+It searches for target account by username.
+Then iterate through target account followers, following them.
+
+Input:
+    1. username and password of own account as env variables,
+    2. target account username as str
+
+Output:
+    1. CSV actions data
+        1.1 Number of followed accounts
+
+Improvements:
+    1. Adapt to run headless (print)
+    2. Better granular control, add functions
+    3. Replace hardcode wait_until_timeout() L90
+    4. Radomize according to wait_until_timeout() input format (ms) L111
+    5. Generate file output
+    6. Followers loaded (print) and inputted
+    7. Async and/or multithread
+'''
+
 import os
 import time
 import random
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright  # expect, Page
 
 
 def main():
-    '''
-    Instagram Bot.
-    This bot logs in into a desired account given a username and password as
-    env variables.
-    It searches for target account by username.
-    Then iterate through target account followers, following them.
-
-    Input:
-        1. username and password of own account as env variables,
-        2. target account username as str
-
-    Output:
-    '''
 
     # env variables
     USERNAME = os.getenv("INSTAGRAM_USERNAME")
@@ -81,28 +93,46 @@ def run(playwright, username, password, target_acc):
         # scroll
         popup_window.evaluate("arguments => arguments.scrollTop = arguments.scrollTop + arguments.scrollHeight;", arguments_handle)
         
-        # wait for dynamic load (TODO remove hardcode sleep) 
-        page.wait_for_timeout(4000)
+        # wait hardcode load
+        page.wait_for_timeout(2000)
+
+        # wait dynamic load 
+        # loading_icon = page.locator("svg[aria-label='Loading...']")
+        # expect(loading_icon).not_to_be_visible(timeout=4000)
 
         new_height = popup_window.evaluate("arguments => arguments.scrollTop + arguments.scrollHeight;", arguments_handle)
 
-        print(f"\nLast Height: {last_height}")
-        print(f"New Height: {new_height}")
+        # print(f"\nLast Height: {last_height}")
+        # print(f"New Height: {new_height}")
 
         if new_height == last_height:
             break
         last_height = new_height
 
+        followers = page.query_selector_all("._aacl._aaco._aacw._aad6._aade")
+        print(f"Number of loaded target followers: {len(followers)}")
+
+        if len(followers) >= 400:
+            break
+
+
     # Iterate through each follower
+    follow_counter = 0
     followers = page.query_selector_all("._aacl._aaco._aacw._aad6._aade")
     for follower in followers:
         follow_status = follower.text_content()
-        print(follow_status)
         if "Follow" == follow_status:
             follower.click()
 
-            # Add random sleep time between each follow
-            page.wait_for_timeout(random.uniform(0.7, 2))
+            # Add random sleep time between each follow (TODO: improve acoording to wait_for_timeout() input (ms))
+            page.wait_for_timeout(random.uniform(0.7, 2) * 2000)
+
+            follow_counter += 1
+            print(f"Number of follows this session: {follow_counter}")
+            continue
+
+        print("Already followed or requested.")
+
 
     # --- Proof of Work ---
     # page.wait_for_timeout(300000)
