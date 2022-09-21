@@ -75,7 +75,9 @@ def run(playwright, username, password, target_acc):
     # scroll down popup
     # popup_window.page.mouse.wheel(0, 1000)
 
-    last_height = popup_window.evaluate("document.getElementsByClassName('_aano')[0].scrollHeight;")
+    arguments_handle = popup_window.evaluate("document.getElementsByClassName('_aano')[0];")
+    last_height = popup_window.evaluate("(arguments) => arguments.scrollHeight;", arguments_handle)
+    # last_height = popup_window.evaluate("document.getElementsByClassName('_aano')[0].scrollHeight;")
     print(last_height)
 
     # while True:
